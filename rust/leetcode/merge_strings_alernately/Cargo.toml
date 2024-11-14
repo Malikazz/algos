@@ -1,0 +1,6 @@
+[package]
+name = "merge_strings_alernately"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
