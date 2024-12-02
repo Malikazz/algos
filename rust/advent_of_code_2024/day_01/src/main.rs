@@ -37,8 +37,8 @@ fn day_01_part_two() -> i32 {
     
     let mut total:i32 = 0;
 
-    for left in vec_left.iter(){
-        for right in vec_right.iter(){
+    for (index, left) in vec_left.iter().enumerate(){
+        for right in vec_right[index..].iter(){
             if right > left{
                 break;
             }
