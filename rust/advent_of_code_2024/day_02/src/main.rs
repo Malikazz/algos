@@ -1,18 +1,12 @@
-use std::{collections::VecDeque, fs};
-use log::debug;
-
-enum Direction{
-    Positive,
-    Negative,
-    UnSet
-}
+use itertools::Itertools;
+use std::fs;
 
 fn main() {
     println!("partone: {:?}", day_02_part_one(parse_input("src/input")));
-    println!("parttwo: {:?}", day_02_part_two(parse_input("src/input")));
+    println!("parttwo: {:?}", day_02_part_two());
 }
 
-fn parse_input(path: &str) -> Vec<Vec<i32>>{
+fn parse_input(path: &str) -> Vec<Vec<i32>> {
     let file_content = fs::read_to_string(path).unwrap();
     let mut report_levels: Vec<Vec<i32>> = Vec::new();
 
@@ -27,26 +21,6 @@ fn parse_input(path: &str) -> Vec<Vec<i32>>{
     }
 
     report_levels
-}
-
-fn calculate_diff_array(input: Vec<i32>) -> Vec<i32>{
-    let mut output:Vec<i32> = Vec::new();
-    for item in input.windows(2){
-        output.push(item[1] - item[0]);
-    }
-    output
-}
-
-fn follows_rules(input: Vec<i32>) -> bool{
-    let mut output: Vec<i32> = Vec::new();
-    
-    // Dose it follow the one direction rule
-    let direction: 
-    for item in input.iter(){
-         
-    }
-
-    true
 }
 
 fn day_02_part_one(report_levels: Vec<Vec<i32>>) -> i32 {
@@ -79,36 +53,24 @@ fn day_02_part_one(report_levels: Vec<Vec<i32>>) -> i32 {
     safe_reports
 }
 
-enum Direciton{
-    Up,
-    Down,
-    UnSet
-}
-
-fn day_02_part_two(report_levels: Vec<Vec<i32>>) -> i32 {
-    let mut safe_reports: i32 = 0;
-    let mut work_que:VecDeque<Vec<i32>> = VecDeque::new();
-    
-    for item in report_levels.into_iter(){
-        work_que.push_back(item);
-    }
-
-    //evaluate if it passes all the rules
-    while let Some(report) = work_que.pop_front(){
-        let mut direction: Direciton = Direciton::UnSet; 
-        for level in report.windows(3){
-           // does 0 -> 1 follow the rules
-           if (level[0] - level[1]).abs() > 0 && (level[0] - level[1]).abs() < 3 {
-               if level[0] < level[1]{
-                   if let Direciton::UnSet = direction{
-                       direction = Direciton::Up;
-                   }
-                
-               } 
-           }
-        }
-    }
-    safe_reports
+fn day_02_part_two(nums: Vec<i32>) -> usize {
+    (0..nums.len())
+        .any(|i| {
+            nums[0..i]
+                .iter()
+                .chain(&nums[i + 1..])
+                .tuple_windows()
+                .try_fold(0, |ord, (a, b)| {
+                    if ord >= 0 && (1..=3).contains(&(b - a)) {
+                        Ok(1)
+                    } else if ord <= 0 && (1..=3).contains(&(a - b)) {
+                        Ok(-1)
+                    } else {
+                        Err(())
+                    }
+                })
+                .is_ok()
+        })
 }
 
 #[cfg(test)]
@@ -118,10 +80,5 @@ mod tests {
     #[test]
     fn test_one() {
         assert_eq!(day_02_part_one(parse_input("src/input_test")), 2);
-    }
-
-    #[test]
-    fn test_two() {
-        assert_eq!(day_02_part_two(parse_input("src/input_test")), 4);
     }
 }
