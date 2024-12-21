@@ -1,84 +1,106 @@
-use std::fs;
-
+use std::cmp::min;
+use std::{fs, usize};
 fn main() {
-    println!("part_one {:?}", part_one(load_string("src/input_test")))
+    println!("part_one {:?}", part_one(load_string("src/input")));
+    println!("part_two {:?}", part_two(load_string("src/input")));
 }
 
-pub struct GraphStrings{
-    pub horizontal: Vec<String>,
-    pub vertical: Vec<String>,
-    pub positive_diagonal: Vec<String>,
-    pub negative_diagonal: Vec<String>
+fn load_string(path: &str) -> Vec<Vec<String>> {
+    let mut matrix: Vec<Vec<String>> = Vec::new();
+
+    for line in fs::read_to_string(path).unwrap().split("\r\n") {
+        let mut temp: Vec<String> = Vec::new();
+        for char in line.chars() {
+            temp.push(String::from(char));
+        }
+        if temp.len() != 0 {
+            matrix.push(temp);
+        }
+    }
+    matrix
 }
 
-impl GraphStrings {
-   pub fn new() -> Self {
-       return GraphStrings { horizontal: Vec::new(), vertical: Vec::new(), positive_diagonal: Vec::new(), negative_diagonal: Vec::new() } 
-   } 
-}
+fn part_one(matrix: Vec<Vec<String>>) -> i32 {
+    let mut sum = 0;
 
-
-fn load_string(path: &str) -> Vec<String> {
-    fs::read_to_string(path).unwrap().lines().map(|c| String::from(c)).collect()
-}
-
-fn part_one(value: Vec<String>) -> i32 {
-    let mut sum: i32 = 0;
-    // I think the move here to make things easy to understand
-    // is to just use lots of memory and make everything a linear search
-    
-    let mut graphStrings: GraphStrings = GraphStrings::new();
-    graphStrings.horizontal = value.clone();
-    graphStrings.vertical = create_vertical(value.clone());
-    graphStrings.positive_diagonal = create_diagonal_positive(value.clone());
-    graphStrings.negative_diagonal = create_diagonal_negative(value.clone());
-
-    sum += graphStrings.horizontal.iter().map(|c| c.matches("XMAS").count()).count() as i32;
-    sum += graphStrings.horizontal.iter().map(|c| c.matches("SAMX").count()).count() as i32;
-    
-    sum += graphStrings.vertical.iter().map(|c| c.matches("XMAS").count()).count() as i32;
-    sum += graphStrings.vertical.iter().map(|c| c.matches("SAMX").count()).count() as i32;
-    
-    sum += graphStrings.positive_diagonal.iter().map(|c| c.matches("XMAS").count()).count() as i32;
-    sum += graphStrings.positive_diagonal.iter().map(|c| c.matches("SAMX").count()).count() as i32;
-    
-    sum += graphStrings.negative_diagonal.iter().map(|c| c.matches("XMAS").count()).count() as i32;
-    sum += graphStrings.negative_diagonal.iter().map(|c| c.matches("SAMX").count()).count() as i32;
+    // from any point atempt to look in all directions and match the string
+    for row in 0..matrix.len() {
+        for col in 0..matrix[0].len() {
+            let horizontal: String = matrix[row][col..min(col + 4, matrix[0].len())].join("");
+            let vertical: String = matrix[row..min(row + 4, matrix.len())]
+                .iter()
+                .map(|a| a[col].clone())
+                .collect::<Vec<String>>()
+                .join("");
+            let right_left: String = matrix[row..min(row + 4, matrix.len())]
+                .iter()
+                .enumerate()
+                .map(|(index, a)| a.get(col + index).unwrap_or(&String::from("")).clone())
+                .collect::<Vec<String>>()
+                .join("");
+            let left_right: String = matrix[row..min(row + 4, matrix.len())]
+                .iter()
+                .enumerate()
+                .map(|(index, a)| {
+                    let mut offset:i32 = col as i32 - index as i32;
+                    if offset < 0 {
+                        offset = i32::MAX;
+                    }
+                    a.get(offset as usize).unwrap_or(&String::from("")).clone()
+                })
+                .collect::<Vec<String>>()
+                .join("");
+           
+            if horizontal == "XMAS" || horizontal == "SAMX"{
+                sum += 1;
+            }
+            
+            if vertical == "XMAS" || vertical == "SAMX"{
+                sum += 1;
+            }
+            
+            if right_left == "XMAS" || right_left == "SAMX"{
+                sum += 1;
+            }
+            
+            if left_right == "XMAS" || left_right == "SAMX"{
+                sum += 1;
+            }
+        }
+    }
 
     sum
 }
 
-fn create_vertical(value: Vec<String>) -> Vec<String>{
-    let mut vertical: Vec<String> = Vec::new();
-    
-    for _ in 0..value[0].len(){
-        vertical.push(String::with_capacity(value.len()));
-    }
+fn part_two(matrix: Vec<Vec<String>>) -> i32{    
+    let mut sum = 0;
 
-    for item in value.iter(){
-        for string_part in 0..item.len(){
-            vertical[string_part] = vertical[string_part].to_owned() + &item[string_part..string_part];
+    // from any point atempt to look in all directions and match the string
+    for row in 0..matrix.len() {
+        for col in 0..matrix[0].len() {
+            let right_left: String = matrix[row..min(row + 3, matrix.len())]
+                .iter()
+                .enumerate()
+                .map(|(index, a)| a.get(col + index).unwrap_or(&String::from("")).clone())
+                .collect::<Vec<String>>()
+                .join("");
+            let left_right: String = matrix[row..min(row + 3, matrix.len())]
+                .iter()
+                .enumerate()
+                .map(|(index, a)| {
+                    let mut offset:i32 = col as i32 - index as i32 + 2;
+                    if offset < 0 {
+                        offset = i32::MAX;
+                    }
+                    a.get(offset as usize).unwrap_or(&String::from("")).clone()
+                })
+                .collect::<Vec<String>>()
+                .join("");
+           
+            if (right_left == "MAS" || right_left == "SAM") && (left_right == "MAS" || left_right == "SAM"){
+                sum += 1;
+            }
         }
     }
-    vertical
-}
-
-fn create_diagonal_positive(value: Vec<String>) -> Vec<String>{
-    let mut temp: Vec<String> = Vec::new();
-
-    for (index, item) in value.iter().enumerate(){
-        temp.push(item[index..].to_owned());
-        temp.push(item[0..index].to_owned());
-    }
-
-    temp
-}
-
-fn create_diagonal_negative(value: Vec<String>) -> Vec<String>{
-    let mut temp: Vec<String> = Vec::new();
-    for item in value.iter(){
-        temp.push(item.chars().rev().collect());
-    }
-    
-    return create_diagonal_positive(temp);
+    sum
 }
