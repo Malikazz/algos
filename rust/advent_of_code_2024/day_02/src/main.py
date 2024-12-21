@@ -1,3 +1,40 @@
+def is_safe(report):
+    """
+    Check if a report is safe without any modifications.
+    """
+    differences = [report[i+1] - report[i] for i in range(len(report) - 1)]
+    all_increasing = all(1 <= d <= 3 for d in differences)
+    all_decreasing = all(-3 <= d <= -1 for d in differences)
+    return all_increasing or all_decreasing
+
+def is_safe_with_dampener(report):
+    """
+    Check if a report can become safe by removing one level.
+    """
+    for i in range(len(report)):
+        modified_report = report[:i] + report[i+1:]
+        if is_safe(modified_report):
+            return True
+    return False
+
+def analyze_reports(data):
+    """
+    Analyze reports to determine how many are safe.
+    """
+    reports = [list(map(int, row.split())) for row in data.strip().split('\n')]
+    safe_count = 0
+    safe_with_dampener_count = 0
+
+    for report in reports:
+        if is_safe(report):
+            safe_count += 1
+        elif is_safe_with_dampener(report):
+            safe_with_dampener_count += 1
+
+    return safe_count, safe_with_dampener_count
+
+# Example data (replace this with your actual data)
+data = """
 1 3 5 6 8 9 12 9
 66 67 70 72 73 74 75 75
 18 20 22 25 28 31 35
@@ -998,3 +1035,9 @@
 51 52 54 57 60 61
 60 59 56 55 54 52 51
 46 47 50 53 54 57 59 61
+"""
+
+# Analyze the reports
+safe, safe_with_dampener = analyze_reports(data)
+print(f"Safe reports: {safe}")
+print(f"Safe reports with dampener: {safe + safe_with_dampener}")

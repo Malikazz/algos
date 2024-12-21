@@ -2,7 +2,28 @@ use std::{fs, usize};
 
 fn main() {
     println!("part_one: {:?}", part_one(load_input("src/input")));
-    println!("part_two: {:?}", part_two(load_input("src/input_test")));
+    println!("part_two: {:?}", part_two(load_input("src/input")));
+}
+
+fn kinda_bubble_sort(mut to_sort: Vec<usize>, rules: Vec<Vec<usize>>) -> Vec<usize> {
+    let mut sorting = true;
+    let mut stop = 0;
+    while sorting && stop != 1000 {
+        sorting = false;
+        stop += 1;
+        for rule in rules.iter() {
+            let before = to_sort.iter().position(|x| x == &rule[0]);
+            let after = to_sort.iter().position(|x| x == &rule[1]);
+            if before.is_some() && after.is_some() && before.unwrap() > after.unwrap() {
+                // swap
+                sorting = true;
+                let temp = to_sort[before.unwrap()];
+                to_sort[before.unwrap()] = to_sort[after.unwrap()];
+                to_sort[after.unwrap()] = temp;
+            }
+        }
+    }
+    to_sort
 }
 
 fn load_input(path: &str) -> (Vec<Vec<usize>>, Vec<Vec<usize>>) {
@@ -66,7 +87,7 @@ fn part_two(input: (Vec<Vec<usize>>, Vec<Vec<usize>>)) -> i32 {
                 .position(|x| x == &rule[1])
                 .unwrap_or(usize::MAX);
             if before > after {
-                bad.push(page.clone());
+                bad.push(kinda_bubble_sort(page.clone(), input.0.clone()));
                 continue 'outer;
             }
         }
@@ -77,22 +98,4 @@ fn part_two(input: (Vec<Vec<usize>>, Vec<Vec<usize>>)) -> i32 {
     }
 
     sum
-}
-
-fn my_sort(mut pages: Vec<Vec<usize>>, rules:Vec<Vec<usize>>) -> Vec<Vec<usize>>{
-    for item in pages.iter(){
-        let sorting = true;
-        for rule in rules.iter(){
-            let before = item.iter().position(|x| x == &rule[0]).unwrap_or(0);
-            let after = item
-                .iter()
-                .position(|x| x == &rule[1])
-                .unwrap_or(usize::MAX);
-            if before > after {
-                item[]
-            }
-        }
-    }
-
-    pages
 }
