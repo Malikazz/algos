@@ -1,12 +1,12 @@
 use std::fs;
 
 fn main() {
-    let part_one_input = parse_input("src/input");
+    let part_one_input = parse_input("src/input_test");
     println!(
         "Part_one: {:?}",
         part_one(part_one_input.0, part_one_input.1)
     );
-    
+
     let part_two_input = parse_input("src/input_test");
     println!(
         "Part_two: {:?}",
@@ -74,34 +74,45 @@ fn part_one(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
     let mut direction = determine_direciton(&matrix[guard.0][guard.1][0..]);
     let mut count: i32 = 0;
     while path_finding || count == 100000 {
+        print_matrix(matrix.clone());
         count += 1;
-        let next_move_index:(i32, i32) = (guard.0 as i32 + direction.0, guard.1 as i32 + direction.1);
+        let next_move_index: (i32, i32) =
+            (guard.0 as i32 + direction.0, guard.1 as i32 + direction.1);
         if next_move_index.0 < 0 || next_move_index.1 < 0 {
             path_finding = false;
             continue;
         }
         let fake_vec: Vec<String> = Vec::new();
-        let next_move = matrix.get(next_move_index.0 as usize).unwrap_or(&fake_vec).get(next_move_index.1 as usize);
-        if next_move.is_some(){
-            let next_move_string = matrix[next_move_index.0 as usize][next_move_index.1 as usize].clone();
-            match &next_move_string[0..]{
+        let next_move = matrix
+            .get(next_move_index.0 as usize)
+            .unwrap_or(&fake_vec)
+            .get(next_move_index.1 as usize);
+        if next_move.is_some() {
+            let next_move_string =
+                matrix[next_move_index.0 as usize][next_move_index.1 as usize].clone();
+            match &next_move_string[0..] {
                 "#" => direction = rotate_90(direction),
                 "." | "X" => {
-                    matrix[next_move_index.0 as usize][next_move_index.1 as usize] = matrix[guard.0][guard.1].clone();
+                    matrix[next_move_index.0 as usize][next_move_index.1 as usize] =
+                        matrix[guard.0][guard.1].clone();
                     matrix[guard.0][guard.1] = String::from("X");
                     guard.0 = next_move_index.0 as usize;
                     guard.1 = next_move_index.1 as usize;
-                },
-                _ => panic!("guard could not move")
+                }
+                _ => panic!("guard could not move"),
             }
         } else {
             path_finding = false;
         }
     }
-    let mut sum = 1;
-    for items in matrix.iter(){
-        for item in items.iter(){
-            if item == "X"{
+    // let the final state also be an X
+    matrix[guard.0][guard.1] = String::from("X");
+    print_matrix(matrix.clone());
+    
+    let mut sum = 0;
+    for items in matrix.iter() {
+        for item in items.iter() {
+            if item == "X" {
                 sum += 1;
             }
         }
@@ -109,62 +120,13 @@ fn part_one(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
     sum
 }
 
-fn print_matrix(matrix: Vec<Vec<String>>){
+fn print_matrix(matrix: Vec<Vec<String>>) {
     println!("");
-    for items in matrix.iter(){
-        for item in items.iter(){
-            println!("{:?}", item);
-        }
+    for items in matrix.iter() {
+        println!("{:?}", items);
     }
 }
 
-
 fn part_two(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
-    let mut matrix = matrix.clone();
-    let mut guard = guard.clone();
-    let mut path_finding = true;
-    let mut direction = determine_direciton(&matrix[guard.0][guard.1][0..]);
-    let mut count: i32 = 0;
-    let mut sum = 0;
-    while path_finding || count == 100000 {
-
-        count += 1;
-        let next_move_index:(i32, i32) = (guard.0 as i32 + direction.0, guard.1 as i32 + direction.1);
-        if next_move_index.0 < 0 || next_move_index.1 < 0 {
-            path_finding = false;
-            continue;
-        }
-        let fake_vec: Vec<String> = Vec::new();
-        let next_move = matrix.get(next_move_index.0 as usize).unwrap_or(&fake_vec).get(next_move_index.1 as usize);
-        if next_move.is_some(){
-            let next_move_string = matrix[next_move_index.0 as usize][next_move_index.1 as usize].clone();
-            match &next_move_string[0..]{
-                "#" => direction = rotate_90(direction),
-                "." => {
-                    matrix[next_move_index.0 as usize][next_move_index.1 as usize] = matrix[guard.0][guard.1].clone();
-                    matrix[guard.0][guard.1] = String::from("X");
-                    guard.0 = next_move_index.0 as usize;
-                    guard.1 = next_move_index.1 as usize;
-                },
-                "X" => {
-                    let check_loop = rotate_90(direction);
-                    let check_pos = matrix.get(check_loop.0 as usize + next_move_index.0 as usize).unwrap_or(&fake_vec).get(check_loop.1 as usize + next_move_index.1 as usize);
-                    if check_pos.is_some(){
-                        print_matrix(matrix.clone());
-                        if check_pos.unwrap() == "X"{
-                            sum += 1;
-                        }
-                    }
-                    matrix[next_move_index.0 as usize][next_move_index.1 as usize] = matrix[guard.0][guard.1].clone();
-                    matrix[guard.0][guard.1] = String::from("X");
-                    guard.0 = next_move_index.0 as usize;
-                    guard.1 = next_move_index.1 as usize;
-                },
-                _ => panic!("guard could not move")
-            }
-        } else {
-            path_finding = false;
-        }
-    }
-    sum
+    0
 }
