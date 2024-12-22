@@ -1,16 +1,14 @@
 use std::fs;
 
 fn main() {
-    let part_one_input = parse_input("src/input_test");
+    let part_one_input = parse_input("src/input");
     println!(
         "Part_one: {:?}",
-        part_one(part_one_input.0, part_one_input.1)
+        part_one(part_one_input.0, part_one_input.1).unwrap_or((0, Vec::new())).0
     );
-
-    let part_two_input = parse_input("src/input_test");
     println!(
         "Part_two: {:?}",
-        part_two(part_two_input.0, part_two_input.1)
+        part_two("src/input", part_one_input.1)
     );
 }
 
@@ -67,14 +65,13 @@ fn determine_direciton(value: &str) -> (i32, i32) {
     }
 }
 
-fn part_one(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
+fn part_one(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> Option<(i32, Vec<Vec<String>>)> {
     let mut matrix = matrix.clone();
     let mut guard = guard.clone();
     let mut path_finding = true;
     let mut direction = determine_direciton(&matrix[guard.0][guard.1][0..]);
     let mut count: i32 = 0;
-    while path_finding || count == 100000 {
-        print_matrix(matrix.clone());
+    while path_finding && count < 10000 {
         count += 1;
         let next_move_index: (i32, i32) =
             (guard.0 as i32 + direction.0, guard.1 as i32 + direction.1);
@@ -105,10 +102,13 @@ fn part_one(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
             path_finding = false;
         }
     }
+    
+    if count >= 10000{
+        return None;
+    }
     // let the final state also be an X
     matrix[guard.0][guard.1] = String::from("X");
-    print_matrix(matrix.clone());
-    
+
     let mut sum = 0;
     for items in matrix.iter() {
         for item in items.iter() {
@@ -117,7 +117,7 @@ fn part_one(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
             }
         }
     }
-    sum
+    Some((sum, matrix))
 }
 
 fn print_matrix(matrix: Vec<Vec<String>>) {
@@ -127,6 +127,24 @@ fn print_matrix(matrix: Vec<Vec<String>>) {
     }
 }
 
-fn part_two(matrix: Vec<Vec<String>>, guard: (usize, usize)) -> i32 {
-    0
+fn part_two(path: &str, guard: (usize, usize)) -> i32 {
+    let inital_state = parse_input(path);
+    let part_one_output: (i32, Vec<Vec<String>>) =
+        part_one(inital_state.0, inital_state.1).unwrap();
+    let mut sum = 0;
+    for (row_index, row) in part_one_output.1.iter().enumerate() {
+        for (col_index, col) in row.iter().enumerate() {
+            if col == "X" {
+                let mut state = part_one_output.clone();
+                state.1[row_index][col_index] = String::from("#");
+                state.1[guard.0][guard.1] = String::from("^");
+
+                let simulation = part_one(state.1, inital_state.1);
+                if simulation.is_none() {
+                    sum += 1;
+                }
+            }
+        }
+    }
+    sum
 }
