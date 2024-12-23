@@ -1,12 +1,13 @@
-use std::{collections::{HashMap, HashSet}, fs};
+use std::{collections::{HashMap, HashSet, VecDeque}, fs};
 
 fn main() {
     println!("Part_one {:?}", part_one(parse_input("src/input")));
+    println!("Part_two {:?}", part_two(parse_input("src/input")));
 }
 
 // Seems like every point may need to track multi things 
 // gonna move forward hoping that the diffculty in part two
-#[derive(Debug, Hash, Eq)]
+#[derive(Debug, Hash, Eq, Clone, Copy)]
 pub struct Point{
     pub x: usize,
     pub y: usize,
@@ -85,5 +86,47 @@ fn part_one(matrix: ((usize, usize), HashMap<String, Vec<Point>>)) -> usize{
         }
     }
     // only count nodes on different points
+    anti_nodes.iter().count()
+}
+
+fn part_two(matrix: ((usize, usize), HashMap<String, Vec<Point>>)) -> usize{
+    let grid = matrix.0;
+    let matrix = matrix.1;
+    let mut anti_nodes: HashSet<Point> = HashSet::new();
+    for key in matrix.keys(){
+        for location in matrix.get(key).unwrap().iter(){
+            anti_nodes.insert(*location);
+            for compare_point in matrix.get(key).unwrap().iter(){
+                if compare_point == location {
+                    continue;
+                }
+                
+                // get transform
+                let transform:Transform = location.vector_to(compare_point);
+                
+                let mut work_que: VecDeque<Point> = VecDeque::new();
+                work_que.push_front(*compare_point);
+
+                while let Some(work) = work_que.pop_front(){
+                    if let Some(first) = transform.transform_point(&work, grid){
+                        anti_nodes.insert(first);
+                        work_que.push_front(first);
+                    }
+                }
+            }        
+        }
+    }
+    // only count nodes on different points
+    for row in 0..grid.1+1{
+        for col in 0..grid.0+1{
+            if let Some(_) = anti_nodes.get(&Point{x:col, y:row}){
+                print!("#");
+            }else {
+                print!(".");
+            }
+        }
+            print!("\n");
+    }
+    
     anti_nodes.iter().count()
 }
