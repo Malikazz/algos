@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, fs};
 
 fn main() {
-    println!("Part one {:?}", part_one(parse_input("src/input_test")));
+    println!("Part one {:?}", part_one(parse_input("src/input")));
 }
 
 #[derive(Debug)]
@@ -58,7 +58,7 @@ fn parse_input(path: &str) -> VecDeque<File> {
             }
         }
     }
-    println!("{:?}", output);
+    //println!("{:?}", output);
     output
 }
 
@@ -83,12 +83,21 @@ fn part_one(hard_drive: VecDeque<File>) -> usize {
                     }
                 }
             }
+            if back.data.len() > 0 {
+                hard_drive.push_back(back);
+            }
+        } else {
+            defraged_drive.push(next_empty);
+            break;
         }
         
         if next_empty.get_avaiable_space() > 0 {
             hard_drive.push_front(next_empty);
+        }else{
+            defraged_drive.push(next_empty);
         }
-    }
 
+    }
+    //println!("{:?}", defraged_drive);
     calculate_checksum(defraged_drive)
 }
