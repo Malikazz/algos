@@ -1,7 +1,7 @@
-use std::{collections::{HashMap, VecDeque}, fs};
+use std::{collections::{hash_set, HashMap, HashSet, VecDeque}, fs};
 
 fn main() {
-    println!("Part One: {:?}", part_one(parse_input("src/input_test")));
+    println!("Part One: {:?}", part_one(parse_input("src/input")));
 }
 
 // make a que add all nodes to look at, at each position
@@ -70,7 +70,7 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
     let valid_moves:Vec<Transform> = vec![UP, DOWN, RIGHT, LEFT];
     
     let mut grid_size: (usize, usize) = (0,0);
-    let mut trails: Vec<HashMap<usize, Vec<Point>>> = Vec::new();
+    let mut trails: Vec<HashMap<usize, HashSet<Point>>> = Vec::new();
     let mut que: VecDeque<Point> = VecDeque::new();
     
     //Init que state 
@@ -84,7 +84,7 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
         grid_size.1 = row_index;
     }
 
-    let mut current_trail: HashMap<usize, Vec<Point>> = HashMap::new();
+    let mut current_trail: HashMap<usize, HashSet<Point>> = HashMap::new();
     while let Some(current_pos) = que.pop_back(){
         let current_point = matrix[current_pos.y][current_pos.x];
         if current_point == 0 && current_trail.len() > 0{
@@ -105,13 +105,13 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
 
         // add the current point
         if current_trail.contains_key(&current_point){
-            current_trail.get_mut(&current_point).unwrap().push(current_pos);
+            current_trail.get_mut(&current_point).unwrap().insert(current_pos);
         } else {
-            current_trail.insert(current_point, vec![current_pos]);
+            current_trail.insert(current_point, HashSet::from([current_pos]));
         }
 
     }
-    let fake_vec: Vec<Point> = Vec::new();
-    trails.iter().map(|a| println!("{:?}", a)).collect::<Vec<_>>();
-    trails.iter().map(|a| a.get(&9).unwrap_or(&fake_vec).len()).sum()
+    let fake_hashset: HashSet<Point> = HashSet::new();
+    
+    trails.iter().map(|a| a.get(&9).unwrap_or(&fake_hashset).len()).sum()
 }
