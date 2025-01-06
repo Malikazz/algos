@@ -1,4 +1,4 @@
-use std::{collections::{hash_set, HashMap, HashSet, VecDeque}, fs};
+use std::{collections::{HashMap, HashSet, VecDeque}, fs, u8};
 
 fn main() {
     println!("Part One: {:?}", part_one(parse_input("src/input")));
@@ -114,4 +114,7 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
     let fake_hashset: HashSet<Point> = HashSet::new();
     
     trails.iter().map(|a| a.get(&9).unwrap_or(&fake_hashset).len()).sum()
+}
+
+fn animate_trails(trails: Vec<HashMap<usize, HashSet<Point>>>, matrix: Vec<Vec<usize>>){
 }
