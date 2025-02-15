@@ -1,7 +1,7 @@
-use std::{collections::{HashMap, HashSet, VecDeque}, fs, u8};
+use std::{collections::{HashMap, HashSet, VecDeque}, fs};
 
 fn main() {
-    println!("Part One: {:?}", part_one(parse_input("src/input")));
+    println!("Part One: {:?}", part_one(parse_input("src/input_test")));
 }
 
 // make a que add all nodes to look at, at each position
@@ -60,8 +60,8 @@ impl Transform {
     }
 }
 
-const UP:Transform = Transform{y:1, x:0};
-const DOWN:Transform = Transform{y:-1, x:0};
+const UP:Transform = Transform{y:-1, x:0};
+const DOWN:Transform = Transform{y:1, x:0};
 const RIGHT:Transform = Transform{y:0, x:1};
 const LEFT:Transform = Transform{y:0, x:-1};
 
@@ -70,7 +70,7 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
     let valid_moves:Vec<Transform> = vec![UP, DOWN, RIGHT, LEFT];
     
     let mut grid_size: (usize, usize) = (0,0);
-    let mut trails: Vec<HashMap<usize, HashSet<Point>>> = Vec::new();
+    let mut trails: Vec<HashSet<Point>> = Vec::new();
     let mut que: VecDeque<Point> = VecDeque::new();
     
     //Init que state 
@@ -84,13 +84,13 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
         grid_size.1 = row_index;
     }
 
-    let mut current_trail: HashMap<usize, HashSet<Point>> = HashMap::new();
+    let mut current_trail: HashSet<Point> = HashSet::new();
     while let Some(current_pos) = que.pop_back(){
         let current_point = matrix[current_pos.y][current_pos.x];
         if current_point == 0 && current_trail.len() > 0{
             // start new list
             trails.push(current_trail);
-            current_trail = HashMap::new();
+            current_trail = HashSet::new();
         }
 
         // add all valid moves to the que
@@ -104,17 +104,18 @@ fn part_one(matrix: Vec<Vec<usize>>) -> usize{
         }
 
         // add the current point
-        if current_trail.contains_key(&current_point){
-            current_trail.get_mut(&current_point).unwrap().insert(current_pos);
-        } else {
-            current_trail.insert(current_point, HashSet::from([current_pos]));
-        }
+        current_trail.insert(current_pos);
 
     }
-    let fake_hashset: HashSet<Point> = HashSet::new();
-    
-    trails.iter().map(|a| a.get(&9).unwrap_or(&fake_hashset).len()).sum()
+
+    let mut sum = 0;
+    for items in trails.iter(){
+        for item in items{
+            if matrix[item.y][item.x] == 9 {
+                sum += 1;
+            }
+        }
+    }
+    sum
 }
 
-fn animate_trails(trails: Vec<HashMap<usize, HashSet<Point>>>, matrix: Vec<Vec<usize>>){
-}
