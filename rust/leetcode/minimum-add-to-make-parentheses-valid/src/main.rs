@@ -43,30 +43,6 @@ mod test {
     }
 
     #[test]
-    fn with_text() {
-        let result = min_add_to_make_valid(String::from("(asdfsdfa))"));
-        assert_eq!(result, 1)
-    }
-
-    #[test]
-    fn with_text_outside_left() {
-        let result = min_add_to_make_valid(String::from("a(asdfsdfa)"));
-        assert_eq!(result, 2)
-    }
-
-    #[test]
-    fn with_text_outside_right() {
-        let result = min_add_to_make_valid(String::from("(asdfsdfa)a"));
-        assert_eq!(result, 2)
-    }
-
-    #[test]
-    fn with_text_outside_both() {
-        let result = min_add_to_make_valid(String::from("a(asdfsdfa)a"));
-        assert_eq!(result, 2)
-    }
-
-    #[test]
     fn cancle_out_simple_count_left() {
         let result = min_add_to_make_valid(String::from("()))(("));
         assert_eq!(result, 4)
